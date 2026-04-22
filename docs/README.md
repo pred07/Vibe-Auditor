@@ -1,40 +1,72 @@
 # PatchBuddy
 
-PatchBuddy is a local static audit utility designed for real-time monitoring of project integrity. It tracks structural changes across Python, JavaScript, Excel, and CSV files to prevent silent regressions and unauthorized code modifications during development sessions, particularly when working with automated coding agents.
+PatchBuddy is a professional static audit utility designed to monitor project integrity in real-time. It specialized in detecting silent regressions, code hallucinations, and data corruption during development sessions, particularly when utilizing automated AI coding agents.
 
-## Feature Overview
+## Core Value Proposition
 
-PatchBuddy provides deep structural analysis beyond simple file hashing. It categorizes changes into regressions, warnings, and modifications based on a predefined architectural taxonomy.
+PatchBuddy addresses the critical risks of automated code generation by providing a deep audit layer that catches:
+- Hallucination Detection: Identifies when an agent adds non-existent functions or references.
+- Silent Regressions: Flags the removal of core methods, signature changes, or deleted error handling blocks.
+- Tracker Consolidation Issues: Monitors Excel/CSV files for column renaming, row loss, or formula overwrites.
+- Syntax and Schema Errors: Real-time alerts for broken code or data type drift.
 
-### Python Audit
-- Detection of class method removal or renaming.
-- Tracking of function signature changes (added or removed arguments).
-- Monitoring of error handling integrity (deletion of try/except blocks).
-- Identification of import statement removals.
+## Technical Monitoring
 
-### JavaScript and TypeScript Audit
-- Extraction and monitoring of exported functions and classes.
-- Detection of changes to API endpoint strings (tracking fetch and axios calls).
+### Supported File Types
+- Programming: .py, .js, .ts
+- Web: .html, .css
+- Data: .xlsx, .csv
 
-### Excel and CSV Data Integrity
-- Formula tracking: Detects when spreadsheet formulas are replaced by hardcoded values.
-- Column integrity: Monitors for renamed columns, changed column order, or count mismatches.
-- Sheet integrity: Tracks sheet deletion, renaming, or unauthorized additions.
-- Data type drift: Alerts when numeric columns transition to text or when date formats change.
+### Audit Checklist Categories
 
-### Agent Context Engine
-Generates sanitized, high-density context blocks optimized for AI coding agents. This allows for immediate verification of current project state and provides explicit instructions for remediation of detected regressions.
+#### Python Analysis
+- Removal or renaming of class methods.
+- Modification of function signatures (argument mismatch).
+- Deletion of try/except blocks (loss of error handling).
+- Removal of required import statements.
+
+#### JavaScript and TypeScript Analysis
+- Tracking of exported functions and class definitions.
+- Monitoring of API endpoint strings in fetch or axios calls.
+
+#### Spreadsheet and Data Integrity
+- Formula Protection: Detects when spreadsheet formulas are replaced by hardcoded values.
+- Column Integrity: Tracks renaming, reordering, or count mismatches.
+- Data Type Drift: Alerts when numeric columns transition to text or when date formats change.
+- Sheet Integrity: Monitors for deleted, renamed, or unauthorized sheet additions.
+
+## Workflow Example
+
+1. Start PatchBuddy in your project root:
+   `python -m audit.cli start`
+2. Allow your AI Agent to perform modifications.
+3. Check the project health:
+   `patchbuddy > status`
+4. If regressions are found, generate instructions for the agent:
+   `patchbuddy > suggest`
+5. Paste the output back into the agent prompt to trigger fixes.
+
+## System Behavior
+
+### Snapshot Trigger Logic
+PatchBuddy utilizes a 2-second debounce timer. When a file change is detected, the utility waits for 2 seconds of inactivity before triggering a snapshot. This prevents excessive disk usage during rapid save operations.
+
+### Automated Cleanup
+To maintain a lean footprint, PatchBuddy implements the following default cleanup rules:
+- Snapshot Retention: Maximum 50 files.
+- Log Retention: 7 days.
+- Report Retention: Last 20 generated reports.
 
 ## Installation
 
-### Local Installation
-To install dependencies within a specific project directory:
+### Local Usage
+Install dependencies within your project:
 ```bash
 pip install -r requirements.txt
 ```
 
-### Global Installation (Development Mode)
-To install PatchBuddy as a system-wide command-line utility:
+### Global Utility
+Install PatchBuddy system-wide in development mode:
 ```bash
 pip install -e .
 ```
@@ -43,38 +75,30 @@ pip install -e .
 
 | Command | Subcommand | Description |
 | :--- | :--- | :--- |
-| status | - | Displays project health score and a summary of recent regressions. |
-| report | - | Generates a standard regression report saved to the .audit directory. |
-| report | detail | Provides a granular differential breakdown of specific structural changes. |
-| report | history | Displays a table of all past snapshots and their corresponding health scores. |
-| suggest | - | Outputs a sanitized context block for use in AI agent prompts. |
-| diff | - | Compares the latest two snapshots and displays the technical differences. |
-| history | - | Shows a timeline of project snapshots and health metrics. |
-| mode | safe | Locks all existing functions, classes, and columns; no deletions allowed. |
-| mode | feature | Allows code additions but prevents modification or removal of existing items. |
-| mode | fix <file> | Locks the entire project state except for the specified target file. |
-| mode | off | Disables strict enforcement and returns to normal monitoring. |
-| storage | - | Displays a breakdown of disk space usage within the .audit directory. |
-| clear | snapshots | Removes all but the last 50 snapshots to save disk space. |
-| clear | history | Deletes all generated reports and clears the session command log. |
-| clear | all | Wipes the entire .audit directory and resets the utility state. |
-| log | session | Displays the timestamped command history of the current session. |
-| protect | <file> | Marks a specific file as critical for inclusion in all audit reports. |
-| ignore | <file> | Excludes a specific file or directory from the monitoring scope. |
-| help | - | Displays the command assistance menu. |
-| exit | - | Terminates the interactive session and stops the background watcher. |
+| status | - | Displays project health score and a summary of regressions. |
+| report | - | Generates a standard regression report in the .audit directory. |
+| report | detail | Provides a granular, per-function differential breakdown. |
+| suggest | - | Generates a clean instruction block for AI agent remediation. |
+| diff | - | Displays technical differences between the last two snapshots. |
+| history | - | Shows a timeline table of all past snapshots and health scores. |
+| mode | safe | Locks all existing items; no deletions or renames allowed. |
+| mode | feature | Allows code additions but protects all existing definitions. |
+| mode | fix <file> | Locks the entire project except for one file; ensures zero collateral damage. |
+| mode | off | Disables strict audit enforcement. |
+| storage | - | Shows disk usage statistics for the .audit directory. |
+| clear | snapshots | Prunes old snapshot files based on retention limits. |
+| clear | history | Deletes all generated reports and the session command log. |
+| clear | all | Wipes the entire .audit directory state. |
+| log | session | Shows the timestamped command history of the current session. |
+| protect | <file> | Marks a specific file for mandatory inclusion in all audit reports. |
+| ignore | <file> | Excludes a file or directory from the monitoring scope. |
 
-## Operational Modes
+## File Locations
 
-PatchBuddy supports state-based enforcement to guide development workflows:
-
-1. **Safe Mode**: Enforces strict structural parity. Any removal of established functions or class methods is flagged as a critical regression.
-2. **Feature Mode**: Accommodates growth by allowing new definitions while maintaining protection for existing legacy code.
-3. **Fix Mode**: Concentrates audit focus on a single file, allowing rapid iteration on a specific bug while ensuring zero collateral damage to the rest of the project.
-
-## Storage Management
-
-Data is persisted in the `.audit` directory. The utility includes automated rotation logic to ensure the directory size remains within manageable limits. Usage metrics can be queried at any time using the storage command.
+- Audit Data: `.audit/`
+- AI Agent Context: `.audit/context.md`
+- Session Command Log: `.audit/session.log`
+- Configuration: `.audit/config.json`
 
 ---
 By ./0xbrijith | github.com/pred07

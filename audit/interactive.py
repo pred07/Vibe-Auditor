@@ -65,7 +65,6 @@ HELP_TEXT = (
     f"  [{C_WHITE}]status[/{C_WHITE}]                   project health score\n"
     f"  [{C_WHITE}]report[/{C_WHITE}]                   basic regression report\n"
     f"  [{C_WHITE}]report detail[/{C_WHITE}]            per-file, per-function diff\n"
-    f"  [{C_WHITE}]report history[/{C_WHITE}]           table of all past snapshots\n"
     f"  [{C_WHITE}]suggest[/{C_WHITE}]                  agent context (paste into next prompt)\n"
     f"  [{C_WHITE}]diff[/{C_WHITE}]                     what changed between last two snapshots\n"
     f"  [{C_WHITE}]history[/{C_WHITE}]                  snapshot timeline table\n"
@@ -180,10 +179,6 @@ def handle_status(storage):
 
 def handle_report(storage, config, subcommand=None):
     reporter = AuditReporter(storage)
-
-    if subcommand == "history":
-        reporter.generate_history(storage)
-        return
 
     before_path, after_path = need_two_snaps(storage)
     if not before_path:
@@ -483,7 +478,7 @@ def start_interactive(project_root):
 
             elif cmd == 'report':
                 sub = args[0].lower() if args else None
-                if sub and sub not in ('detail', 'history'):
+                if sub and sub != 'detail':
                     console.print(
                         f"[{C_WARNING}]unknown subcommand.[/{C_WARNING}] "
                         f"try: [bold {C_PRIMARY}]report[/bold {C_PRIMARY}]  "
