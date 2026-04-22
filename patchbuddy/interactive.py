@@ -72,8 +72,9 @@ HELP_TEXT = (
     f"  [{C_WHITE}]protect <filename>[/{C_WHITE}]       mark file as critical\n"
     f"  [{C_WHITE}]ignore <filename>[/{C_WHITE}]        stop tracking a file\n"
     f"  [{C_WHITE}]storage[/{C_WHITE}]                  show .audit/ disk usage\n"
+    f"  [{C_WHITE}]baseline mark|status|diff[/{C_WHITE}]    pin and track a 'Golden Goal'\n"
+    f"  [{C_WHITE}]suggest holistic[/{C_WHITE}]           final lifecycle audit prompt\n"
     f"  [{C_WHITE}]clear logs|snapshots|all[/{C_WHITE}]   cleanup old data\n"
-    f"  [{C_WHITE}]log session[/{C_WHITE}]              show command history\n"
     f"  [{C_WHITE}]help[/{C_WHITE}]                     show this help\n"
     f"  [{C_WHITE}]exit[/{C_WHITE}]                     quit\n"
 )
@@ -201,9 +202,18 @@ def handle_report(storage, config, subcommand=None):
     storage.update_context(context_text)
 
 
-def handle_suggest(storage, config):
+def handle_suggest(storage, config, holistic=False):
     # Regenerate context first so it's always current
     before_path, after_path = need_two_snaps(storage)
+    
+    # Holistic override: compare latest against baseline
+    if holistic:
+        baseline = storage.baseline_file
+        if not baseline.exists():
+            console.print(f"[{C_WARNING}][!][/{C_WARNING}] No baseline marked. Run [bold {C_PRIMARY}]baseline mark[/bold {C_PRIMARY}] first.")
+            return
+        before_path = baseline
+
     if before_path:
         before = storage.load_snapshot(before_path)
         after  = storage.load_snapshot(after_path)
@@ -211,10 +221,79 @@ def handle_suggest(storage, config):
         diff   = differ.compare(before, after)
         suggester = AuditSuggester(storage)
         context_text = suggester.generate_context(before, after, diff, config=config)
+        
+        if holistic:
+            # Inject Holistic persona into the context
+            context_text = (
+                "# HOLISTIC LIFECYCLE AUDIT\n"
+                "You are performing a final consistency review against the ORIGINAL PROJECT GOAL.\n"
+                "Ignore minor intermediate fixes; focus on whether the final state preserves the initial objective.\n\n"
+                + context_text
+            )
+        
         storage.update_context(context_text)
 
     suggester = AuditSuggester(storage)
     suggester.print_context(storage, config=config)
+
+
+def handle_baseline(storage, args):
+    """baseline mark | status | diff"""
+    if not args:
+        console.print(f"[{C_WARNING}]usage:[/{C_WARNING}] baseline mark | status | diff")
+        return
+
+    sub = args[0].lower()
+    
+    if sub == "mark":
+        snaps = storage.get_latest_snapshots(1)
+        if not snaps:
+            console.print(f"[{C_DANGER}][x][/{C_DANGER}] No snapshots available to mark as baseline.")
+            return
+        storage.set_baseline(snaps[0])
+        console.print(f"[{C_SUCCESS}][ok][/{C_SUCCESS}] Current state pinned as your [bold]Golden Baseline[/bold].")
+        console.print(f"[{C_DIM}]All future 'baseline' commands will compare against this moment.[/{C_DIM}]")
+
+    elif sub == "status":
+        baseline_path = storage.baseline_file
+        if not baseline_path.exists():
+            console.print(f"[{C_WARNING}][!][/{C_WARNING}] No baseline found. Use [bold {C_PRIMARY}]baseline mark[/bold {C_PRIMARY}] first.")
+            return
+            
+        snaps = storage.get_latest_snapshots(1)
+        if not snaps: return
+        
+        before = storage.load_snapshot(baseline_path)
+        after  = storage.load_snapshot(snaps[0])
+        
+        differ = AuditDiffer()
+        diff = differ.compare(before, after)
+        score = diff['summary']['health_score']
+        
+        score_color = C_SUCCESS if score >= 7 else C_WARNING if score >= 5 else C_DANGER
+        
+        console.print(f"\n  [bold {C_PRIMARY}]Objective Alignment Audit[/bold {C_PRIMARY}]")
+        console.print(f"  [{C_DIM}]Comparing against your Golden Baseline[/{C_DIM}]")
+        console.print(SEP)
+        console.print(f"  Alignment Score: [bold {score_color}]{score}/10[/bold {score_color}]")
+        console.print(f"  Total Deviations: [{C_DANGER}]{diff['summary']['regressions_found']}[/{C_DANGER}]")
+        console.print(f"  Structural Drift: [{C_WARNING}]{diff['summary']['files_modified']}[/{C_WARNING}] files changed since baseline")
+        console.print(SEP)
+
+    elif sub == "diff":
+        baseline_path = storage.baseline_file
+        if not baseline_path.exists():
+            console.print(f"[{C_WARNING}][!][/{C_WARNING}] No baseline found.")
+            return
+        snaps = storage.get_latest_snapshots(1)
+        before = storage.load_snapshot(baseline_path)
+        after  = storage.load_snapshot(snaps[0])
+        
+        reporter = AuditReporter(storage)
+        console.print(f"\n[bold {C_PRIMARY}]Detailed Objective Drift Report[/bold {C_PRIMARY}]")
+        reporter.generate_detail(before, after)
+    else:
+        console.print(f"[{C_WARNING}]unknown baseline subcommand.[/{C_WARNING}]")
 
 
 def handle_diff(storage):
@@ -488,7 +567,11 @@ def start_interactive(project_root):
                     handle_report(storage, config, subcommand=sub)
 
             elif cmd == 'suggest':
-                handle_suggest(storage, config)
+                holistic = True if (args and args[0] == 'holistic') else False
+                handle_suggest(storage, config, holistic=holistic)
+
+            elif cmd == 'baseline':
+                handle_baseline(storage, args)
 
             elif cmd == 'diff':
                 handle_diff(storage)

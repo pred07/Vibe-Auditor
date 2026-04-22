@@ -12,6 +12,7 @@ class AuditStorage:
         self.snapshots_dir = self.audit_dir / "snapshots"
         self.diffs_dir = self.audit_dir / "diffs"
         self.reports_dir = self.audit_dir / "reports"
+        self.baseline_file = self.audit_dir / "baseline.json"
         self.context_file = self.audit_dir / "context.md"
         self.session_log_file = self.audit_dir / "session.log"
 
@@ -86,6 +87,19 @@ class AuditStorage:
             self._ensure_dirs()
             return True
         return False
+
+    def set_baseline(self, snapshot_path):
+        """Copies a snapshot to be the permanent baseline."""
+        if not snapshot_path.exists():
+            return False
+        shutil.copy2(snapshot_path, self.baseline_file)
+        return True
+
+    def get_baseline(self):
+        """Returns the baseline snapshot data or None."""
+        if not self.baseline_file.exists():
+            return None
+        return self.load_snapshot(self.baseline_file)
 
     def get_latest_snapshots(self, count=2):
         files = sorted(self.snapshots_dir.glob("snapshot_*.json"), reverse=True)
