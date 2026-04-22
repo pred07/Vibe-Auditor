@@ -227,7 +227,8 @@ def handle_suggest(storage, config, holistic=False, verbose=False):
             context_text = (
                 "# HOLISTIC LIFECYCLE AUDIT (READ-ONLY STATUS REVIEW)\n"
                 "CRITICAL: You are acting as a STATIC AUDITOR. Your task is to REVIEW and REPORT only.\n"
-                "DO NOT make modifications. DO NOT suggest code changes. \n"
+                "You may provide suggested fixes in your report, but DO NOT modify any files yourself.\n"
+                "The developer will review your report and decide whether to implement changes.\n"
                 "Compare the ORIGINAL PROJECT GOAL against the CURRENT STATE and report on:\n"
                 "1. Consistency across all files and functions.\n"
                 "2. Preservation of the initial logic and objective.\n"

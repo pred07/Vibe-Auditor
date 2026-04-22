@@ -139,8 +139,8 @@ class AuditSuggester:
                 context.append(f"- {w}")
             context.append("")
 
-        # Mode-specific instructions
         context.append("### Instructions for agent:")
+        context.append("- Your role is to VERIFY and REPORT. The developer will make all final decisions on implementation.")
         if config and config.mode == "safe":
             context.append("- MODE SAFE: Do not remove or rename any existing function, class, or column.")
         elif config and config.mode == "feature":
@@ -150,11 +150,10 @@ class AuditSuggester:
             context.append(f"- MODE FIX: Only '{mf}' may be changed. All other files are locked.")
         
         if diff["regressions"] or diff.get("warnings"):
-            context.append("- Prioritize fixing the regressions and verifying the warnings listed above.")
+            context.append("- Audit the regressions/warnings above. You may suggest fixes in your reply, but DO NOT modify files unless the developer approves.")
         
-        context.append("- Restore any removed functions, methods, or imports unless explicitly asked.")
-        context.append("- Ensure all Excel formulas and CSV schemas remain identical to previous versions.")
-        context.append("- Fix any syntax errors immediately.")
+        context.append("- Report any removed functions, methods, or imports.")
+        context.append("- Verify if Excel formulas and CSV schemas remain identical to previous versions.")
 
         return "\n".join(context)
 
