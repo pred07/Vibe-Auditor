@@ -225,9 +225,13 @@ def handle_suggest(storage, config, holistic=False):
         if holistic:
             # Inject Holistic persona into the context
             context_text = (
-                "# HOLISTIC LIFECYCLE AUDIT\n"
-                "You are performing a final consistency review against the ORIGINAL PROJECT GOAL.\n"
-                "Ignore minor intermediate fixes; focus on whether the final state preserves the initial objective.\n\n"
+                "# HOLISTIC LIFECYCLE AUDIT (READ-ONLY STATUS REVIEW)\n"
+                "CRITICAL: You are acting as a STATIC AUDITOR. Your task is to REVIEW and REPORT only.\n"
+                "DO NOT make modifications. DO NOT suggest code changes. \n"
+                "Compare the ORIGINAL PROJECT GOAL against the CURRENT STATE and report on:\n"
+                "1. Consistency across all files and functions.\n"
+                "2. Preservation of the initial logic and objective.\n"
+                "3. Accuracy of the final outputs/schemas.\n\n"
                 + context_text
             )
         
