@@ -1,0 +1,9 @@
+.audit/
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+*.xlsx
+*.csv
+!demo.xlsx
+!demo.csv
