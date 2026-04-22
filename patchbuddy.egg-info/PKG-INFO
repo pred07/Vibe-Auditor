@@ -1,11 +1,12 @@
 Metadata-Version: 2.4
 Name: patchbuddy
-Version: 1.0.2
+Version: 1.0.3
 Summary: Your friendly patch companion
 Home-page: https://github.com/pred07/patchbuddy
 Author: 0xbrijith
 Description-Content-Type: text/markdown
 Requires-Dist: watchdog
+Requires-Dist: click
 Requires-Dist: rich
 Requires-Dist: openpyxl
 Requires-Dist: pandas
