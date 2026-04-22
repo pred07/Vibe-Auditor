@@ -1,20 +1,23 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="audit-watch",
-    version="0.1.0",
+    name="patchbuddy",
+    version="1.0.0",
     packages=find_packages(),
     install_requires=[
-        "watchdog>=3.0.0",
-        "click>=8.0.0",
-        "rich>=13.0.0",
-        "openpyxl>=3.1.0",
-        "pandas>=2.0.0",
+        "watchdog",
+        "rich",
+        "openpyxl",
+        "pandas"
     ],
     entry_points={
         "console_scripts": [
-            "audit=audit.cli:main",
-            "audit-watch=audit.cli:watch",
-        ],
+            "audit=audit.cli:main"
+        ]
     },
+    author="0xbrijith",
+    description="Your friendly patch companion",
+    long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
+    url="https://github.com/pred07/patchbuddy",
 )
