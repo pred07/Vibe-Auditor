@@ -46,16 +46,58 @@ PatchBuddy addresses the critical risks of automated code generation by providin
 - Data Type Drift: Alerts when numeric columns transition to text or when date formats change.
 - Sheet Integrity: Monitors for deleted, renamed, or unauthorized sheet additions.
 
-## Workflow Example
+## Operational Workflow
 
-1. Start PatchBuddy in your project root:
-   `python -m audit.cli start`
-2. Allow your AI Agent to perform modifications.
-3. Check the project health:
-   `patchbuddy > status`
-4. If regressions are found, generate instructions for the agent:
-   `patchbuddy > suggest`
-5. Paste the output back into the agent prompt to trigger fixes.
+### Standard Development Cycle
+
+1. **Navigate to your project**
+   ```bash
+   cd C:\Users\groot\Music\MyProject
+   ```
+
+2. **Start PatchBuddy in a separate terminal**
+   ```bash
+   python -m audit.cli start
+   ```
+   Maintain this terminal throughout the session for real-time monitoring.
+
+3. **Set an operational mode**
+   - For general protection: `patchbuddy > mode safe`
+   - For adding new features: `patchbuddy > mode feature`
+   - For isolated debugging: `patchbuddy > mode fix src/main.py`
+
+4. **Initialize Agent Context**
+   Execute `patchbuddy > suggest` and copy the generated output. Paste this at the beginning of your AI agent prompt to define structural boundaries.
+
+5. **Execute Agent Task**
+   Provide your specific coding prompt to the agent. PatchBuddy will automatically snapshot every change in the background.
+
+6. **Verify Project Health**
+   Once the agent finishes, run `patchbuddy > status` to view the health score.
+
+7. **Remediate Regressions**
+   If the score is below 10/10:
+   - Run `patchbuddy > report detail` to identify specific structural failures.
+   - Run `patchbuddy > suggest` to generate updated fix instructions.
+   - Paste the new context into the agent to trigger a repair cycle.
+
+8. **Iterate**
+   Repeat the cycle until the health score returns to 10/10.
+
+### Tracker Consolidation Flow
+
+1. Populate your project directory with the source tracker files.
+2. Initialize PatchBuddy and set `mode safe`.
+3. Generate `suggest` context and include it with your consolidation prompt to the agent.
+4. Execute consolidation.
+5. Run `status` and `report detail` to verify column integrity, row counts, and formula preservation.
+6. If corruption is detected, use the `suggest` command to guide the agent through the fix.
+
+### Essential Utilities
+- `patchbuddy > diff` : Inspect specific technical changes from the last run.
+- `patchbuddy > history` : Review the full timeline of agent iterations.
+- `patchbuddy > storage` : Monitor the size of the audit data directory.
+- `patchbuddy > clear logs` : Purge session data upon completion.
 
 ## System Behavior
 
