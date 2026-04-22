@@ -1,0 +1,4 @@
+watchdog
+rich
+openpyxl
+pandas

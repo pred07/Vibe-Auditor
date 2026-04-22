@@ -121,6 +121,19 @@ To maintain a lean footprint, PatchBuddy implements the following default cleanu
 
 ---
 
+## Troubleshooting
+
+### Command Not Recognized (Windows)
+If you receive an error stating that `patchbuddy` or `audit` is not recognized after installation, your Python Scripts folder may not be in your system PATH.
+
+**The Universal Method**: You can bypass PATH issues on any system (Windows, Mac, Linux) by running the utility directly through Python:
+```bash
+python -m audit.cli start
+```
+
+### Installation Warnings
+If you see a yellow warning during installation mentioning that scripts are installed in a directory not on PATH, you can either add that directory to your Environment Variables or use the **Universal Method** above.
+
 ## Upgrade
 
 To update PatchBuddy to the latest version:
