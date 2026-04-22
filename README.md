@@ -128,7 +128,7 @@ If you receive an error stating that `patchbuddy` or `audit` is not recognized a
 
 **The Universal Method**: You can bypass PATH issues on any system (Windows, Mac, Linux) by running the utility directly through Python:
 ```bash
-python -m audit.cli start
+python -m patchbuddy.cli start
 ```
 
 ### Installation Warnings

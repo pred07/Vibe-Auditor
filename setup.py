@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="patchbuddy",
-    version="1.0.3",
+    version="1.0.4",
     packages=find_packages(),
     install_requires=[
         "watchdog",
@@ -13,8 +13,8 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "audit=audit.cli:main",
-            "patchbuddy=audit.cli:main"
+            "audit=patchbuddy.cli:main",
+            "patchbuddy=patchbuddy.cli:main"
         ]
     },
     author="0xbrijith",
