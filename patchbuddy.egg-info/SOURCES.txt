@@ -1,5 +1,7 @@
 README.md
 setup.py
+audit/__init__.py
+audit/cli.py
 patchbuddy/__init__.py
 patchbuddy/cli.py
 patchbuddy/config.py
