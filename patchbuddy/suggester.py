@@ -41,7 +41,7 @@ class AuditSuggester:
                 out.append(line)
         return "\n".join(out)
 
-    def generate_context(self, before_snap, after_snap, diff, config=None):
+    def generate_context(self, before_snap, after_snap, diff, config=None, verbose=False):
         """
         Generate plain-text context.md for storage.
         Enhanced: lists protected functions by name, column names, active mode.
@@ -71,6 +71,11 @@ class AuditSuggester:
             is_protected = f in protected_set
 
             prefix = "[PROTECTED] " if is_protected else ""
+
+            if not verbose and not is_protected:
+                context.append(f"- {prefix}{f} -- verified working")
+                shown.add(f)
+                continue
 
             if ftype == "python":
                 funcs = fdata.get("functions", [])

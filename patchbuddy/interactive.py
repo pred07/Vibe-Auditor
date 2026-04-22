@@ -65,7 +65,7 @@ HELP_TEXT = (
     f"  [{C_WHITE}]status[/{C_WHITE}]                   project health score\n"
     f"  [{C_WHITE}]report[/{C_WHITE}]                   basic regression report\n"
     f"  [{C_WHITE}]report detail[/{C_WHITE}]            per-file, per-function diff\n"
-    f"  [{C_WHITE}]suggest[/{C_WHITE}]                  agent context (paste into next prompt)\n"
+    f"  [{C_WHITE}]suggest [verbose][/{C_WHITE}]           agent context (paste into next prompt)\n"
     f"  [{C_WHITE}]diff[/{C_WHITE}]                     what changed between last two snapshots\n"
     f"  [{C_WHITE}]history[/{C_WHITE}]                  snapshot timeline table\n"
     f"  [{C_WHITE}]mode safe|feature|fix <f>|off|status[/{C_WHITE}]\n"
@@ -178,7 +178,7 @@ def handle_status(storage):
             console.print(f"  [{C_DANGER}]x[/{C_DANGER}]  [{C_TEXT}]{r}[/{C_TEXT}]")
 
 
-def handle_report(storage, config, subcommand=None):
+def handle_report(storage, config, subcommand=None, verbose=False):
     reporter = AuditReporter(storage)
 
     before_path, after_path = need_two_snaps(storage)
@@ -198,11 +198,11 @@ def handle_report(storage, config, subcommand=None):
 
     # Auto-update context.md
     suggester = AuditSuggester(storage)
-    context_text = suggester.generate_context(before, after, diff, config=config)
+    context_text = suggester.generate_context(before, after, diff, config=config, verbose=verbose)
     storage.update_context(context_text)
 
 
-def handle_suggest(storage, config, holistic=False):
+def handle_suggest(storage, config, holistic=False, verbose=False):
     # Regenerate context first so it's always current
     before_path, after_path = need_two_snaps(storage)
     
@@ -220,7 +220,7 @@ def handle_suggest(storage, config, holistic=False):
         differ = AuditDiffer()
         diff   = differ.compare(before, after)
         suggester = AuditSuggester(storage)
-        context_text = suggester.generate_context(before, after, diff, config=config)
+        context_text = suggester.generate_context(before, after, diff, config=config, verbose=verbose)
         
         if holistic:
             # Inject Holistic persona into the context
@@ -568,11 +568,13 @@ def start_interactive(project_root):
                         f"[bold {C_PRIMARY}]report detail[/bold {C_PRIMARY}]"
                     )
                 else:
-                    handle_report(storage, config, subcommand=sub)
+                    verbose = True if (args and 'verbose' in [a.lower() for a in args]) else False
+                    handle_report(storage, config, subcommand=sub, verbose=verbose)
 
             elif cmd == 'suggest':
-                holistic = True if (args and args[0] == 'holistic') else False
-                handle_suggest(storage, config, holistic=holistic)
+                holistic = True if (args and 'holistic' in [a.lower() for a in args]) else False
+                verbose = True if (args and 'verbose' in [a.lower() for a in args]) else False
+                handle_suggest(storage, config, holistic=holistic, verbose=verbose)
 
             elif cmd == 'baseline':
                 handle_baseline(storage, args)
