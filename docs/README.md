@@ -1,6 +1,6 @@
 # PatchBuddy
 
-PatchBuddy is a professional static audit utility designed to monitor project integrity in real-time. It specialized in detecting silent regressions, code hallucinations, and data corruption during development sessions, particularly when utilizing automated AI coding agents.
+PatchBuddy is a professional static audit utility designed to monitor project integrity in real-time. It specializes in detecting silent regressions, code hallucinations, and data corruption during development sessions, particularly when utilizing automated AI coding agents.
 
 ## Core Value Proposition
 
@@ -19,6 +19,12 @@ PatchBuddy addresses the critical risks of automated code generation by providin
 
 ### Audit Checklist Categories
 
+#### Hallucination Detection
+- Unrequested Additions: Identification of functions or logic blocks that were never part of the original project scope.
+- Assumption Fill: Detection of "fake" column data or assumed cell values in spreadsheets.
+- Redundant Variation: Alerts for duplicate functions added with slight naming or signature variations.
+- Dead Code Insertion: Tracking of orphaned or unreachable code blocks inserted without request.
+
 #### Python Analysis
 - Removal or renaming of class methods.
 - Modification of function signatures (argument mismatch).
@@ -28,6 +34,11 @@ PatchBuddy addresses the critical risks of automated code generation by providin
 #### JavaScript and TypeScript Analysis
 - Tracking of exported functions and class definitions.
 - Monitoring of API endpoint strings in fetch or axios calls.
+
+#### Web Interface Integrity (HTML/CSS)
+- Structural Shifts: Monitoring for unauthorized changes to semantic HTML5 hierarchies.
+- Identity Tracking: Alerts for renaming or deletion of critical element IDs used in scripts.
+- Styling Regressions: Tracking of CSS rule deletions or global variable overrides.
 
 #### Spreadsheet and Data Integrity
 - Formula Protection: Detects when spreadsheet formulas are replaced by hardcoded values.
@@ -81,9 +92,9 @@ pip install -e .
 | suggest | - | Generates a clean instruction block for AI agent remediation. |
 | diff | - | Displays technical differences between the last two snapshots. |
 | history | - | Shows a timeline table of all past snapshots and health scores. |
-| mode | safe | Locks all existing items; no deletions or renames allowed. |
-| mode | feature | Allows code additions but protects all existing definitions. |
-| mode | fix <file> | Locks the entire project except for one file; ensures zero collateral damage. |
+| mode | safe | The strictest mode; prevents any deletion or renaming of existing items. |
+| mode | feature | Allows code additions but protects all existing definitions from change. |
+| mode | fix <file> | Focuses audit on one file; ensures zero collateral damage elsewhere. |
 | mode | off | Disables strict audit enforcement. |
 | storage | - | Shows disk usage statistics for the .audit directory. |
 | clear | snapshots | Prunes old snapshot files based on retention limits. |
@@ -96,7 +107,7 @@ pip install -e .
 ## File Locations
 
 - Audit Data: `.audit/`
-- AI Agent Context: `.audit/context.md`
+- AI Agent Context: `.audit/context.md` (Self-updating file containing current health status for agent prompts)
 - Session Command Log: `.audit/session.log`
 - Configuration: `.audit/config.json`
 
