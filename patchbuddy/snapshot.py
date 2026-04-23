@@ -39,8 +39,8 @@ class AuditSnapshot:
         hasher = hashlib.md5()
         try:
             with open(filepath, 'rb') as f:
-                buf = f.read()
-                hasher.update(buf)
+                while chunk := f.read(4096):
+                    hasher.update(chunk)
             return hasher.hexdigest()
         except Exception:
             return None
@@ -52,11 +52,33 @@ class AuditSnapshot:
             "files": {}
         }
 
-        for path in self.project_root.rglob("*"):
-            if path.is_file() and not self._should_ignore(path):
-                rel_path = str(path.relative_to(self.project_root))
-                file_hash = self.generate_hash(path)
+        # Optimized traversal using os.walk to prune ignored directories early
+        for root, dirs, files in os.walk(self.project_root):
+            root_path = Path(root)
+            
+            # Prune directories in-place to prevent os.walk from entering them
+            dirs_to_remove = []
+            for d in dirs:
+                if d in self.ignore_patterns:
+                    dirs_to_remove.append(d)
+                else:
+                    # Check if the relative path of the directory is in ignored_files
+                    rel_dir = str((root_path / d).relative_to(self.project_root))
+                    if rel_dir in self.ignored_files:
+                        dirs_to_remove.append(d)
+            
+            for d in dirs_to_remove:
+                dirs.remove(d)
 
+            for filename in files:
+                path = root_path / filename
+                rel_path = str(path.relative_to(self.project_root))
+                
+                # Double check ignored files (for files specifically)
+                if rel_path in self.ignored_files:
+                    continue
+                    
+                file_hash = self.generate_hash(path)
                 snapshot["files"][rel_path] = {
                     "hash": file_hash,
                     "size": path.stat().st_size,

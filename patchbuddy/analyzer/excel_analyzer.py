@@ -27,18 +27,14 @@ class ExcelAnalyzer:
                 
                 # Track formulas
                 formulas = {}
-                # In read_only mode, iterating over cells can be slow for large files
-                # But we need it for formulas. We'll limit the range if possible, 
-                # but for static audit we usually care about the core data area.
-                # Let's check max_row/max_column and maybe cap it for safety
-                max_r = min(ws.max_row or 0, 1000) # Cap for performance in audit
+                # In read_only mode, using iter_rows is much faster than ws.cell()
+                max_r = min(ws.max_row or 0, 1000)
                 max_c = min(ws.max_column or 0, 50)
                 
-                for r in range(1, max_r + 1):
-                    for c in range(1, max_c + 1):
-                        cell = ws.cell(row=r, column=c)
+                for row_idx, row in enumerate(ws.iter_rows(max_row=max_r, max_col=max_c), start=1):
+                    for col_idx, cell in enumerate(row, start=1):
                         if cell.value and isinstance(cell.value, str) and cell.value.startswith('='):
-                            formulas[f"{openpyxl.utils.get_column_letter(c)}{r}"] = cell.value
+                            formulas[f"{openpyxl.utils.get_column_letter(col_idx)}{row_idx}"] = cell.value
                 
                 sheets[sheet_name] = {
                     "columns": headers,
