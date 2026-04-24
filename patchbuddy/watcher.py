@@ -11,6 +11,8 @@ from .differ import AuditDiffer
 from rich.console import Console
 
 console = Console(highlight=False)
+C_DIM = "#7A6A5A"
+
 
 
 class AuditHandler(FileSystemEventHandler):
@@ -28,7 +30,7 @@ class AuditHandler(FileSystemEventHandler):
 
         # Take initial snapshot — print directly (no prompt yet)
         ts = datetime.now().strftime("%H:%M:%S")
-        console.print(f"[dim #A0826D]  {ts}  [init] scanning project...[/dim #A0826D]")
+        console.print(f"[{C_DIM}]  {ts}  [init] scanning project...[/]")
         self.take_snapshot("initial", direct_print=True)
 
     def on_modified(self, event):
@@ -65,13 +67,13 @@ class AuditHandler(FileSystemEventHandler):
         data["trigger"] = trigger_type
         self.storage.save_snapshot(data)
         ts = datetime.now().strftime("%H:%M:%S")
-        msg = f"[dim #A0826D]  {ts}  [~] snapshot updated[/dim #A0826D]"
+        msg = f"[{C_DIM}]  {ts}  [~] snapshot updated[/]"
         if trigger_type == "initial":
-            msg = f"[dim #A0826D]  {ts}  [ok] snapshot ready[/dim #A0826D]"
-        if direct_print:
-            console.print(msg)
-        else:
-            self.message_queue.put(msg)
+            msg = f"[{C_DIM}]  {ts}  [ok] snapshot ready[/]"
+        self.message_queue.put(msg)
+        if trigger_type != "initial":
+            # Signal Zen mode that a background update happened
+            self.message_queue.put("__ZEN_UPDATE__")
 
     def check_debounce(self):
         if self.pending_change and (time.time() - self.last_trigger) > self.debounce_seconds:

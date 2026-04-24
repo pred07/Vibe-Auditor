@@ -95,18 +95,29 @@ To maintain a lean footprint, PatchBuddy implements the following default cleanu
 | status | - | Displays project health score and a summary of regressions. |
 | report | - | Generates a standard regression report in the .audit directory. |
 | report | detail | Provides a granular, per-function differential breakdown. |
-| suggest | - | Generates a clean instruction block for AI agent remediation. |
+| promptbuddy | - | Generates a high-fidelity audit prompt for fixes (strictly read-only). |
+| suggest | <verbose> | Generates a clean instruction block for AI agent remediation. |
+| suggest | holistic | Generates a final lifecycle audit prompt covering the entire project. |
 | diff | - | Displays technical differences between the last two snapshots. |
 | history | - | Shows a timeline table of all past snapshots and health scores. |
 | mode | safe | The strictest mode; prevents any deletion or renaming of existing items. |
 | mode | feature | Allows code additions but protects all existing definitions from change. |
 | mode | fix <file> | Focuses audit on one file; ensures zero collateral damage elsewhere. |
+| mode | status | Displays the currently active audit mode and scope. |
 | mode | off | Disables strict audit enforcement. |
+| protect | <file> | Marks a specific file for mandatory inclusion in all audit reports. |
+| ignore | <file> | Excludes a file or directory from the monitoring scope. |
+| baseline | mark | Pins the current project state as the 'Golden Goal'. |
+| baseline | status | Compares current state against the pinned Golden Baseline. |
+| baseline | diff | Shows detailed structural drift from the Golden Baseline. |
 | storage | - | Shows disk usage statistics for the .audit directory. |
+| clear | - | Clears the terminal screen and resets the interface to the top. |
 | clear | snapshots | Prunes old snapshot files based on retention limits. |
 | clear | history | Deletes all generated reports and the session command log. |
 | clear | all | Wipes the entire .audit directory state. |
 | log | session | Shows the timestamped command history of the current session. |
+| help | - | Displays the interactive command menu. |
+| exit | - | Shuts down the watcher and exits the CLI. |
 | protect | <file> | Marks a specific file for mandatory inclusion in all audit reports. |
 | ignore | <file> | Excludes a file or directory from the monitoring scope. |
 

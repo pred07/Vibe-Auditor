@@ -4,8 +4,6 @@ from rich.text import Text
 from rich import box
 import re
 
-_console = Console(highlight=False)
-
 # Claude-inspired palette
 C_PRIMARY = "#E07040"  # Original Orange
 C_MUTED   = "#A0826D"
@@ -18,8 +16,9 @@ C_BORDER  = "#A0826D"
 
 
 class AuditSuggester:
-    def __init__(self, storage):
+    def __init__(self, storage, console=None):
         self.storage = storage
+        self.console = console or Console()
 
     @staticmethod
     def _to_clean_text(raw):
@@ -152,17 +151,19 @@ class AuditSuggester:
         if diff["regressions"] or diff.get("warnings"):
             context.append("- Audit the regressions/warnings above. You may suggest fixes in your reply, but DO NOT modify files unless the developer approves.")
         
-        context.append("- Report any removed functions, methods, or imports.")
-        context.append("- Verify if Excel formulas and CSV schemas remain identical to previous versions.")
+        context.append("- ARCHITECTURAL GUARDRAILS: Preserve all existing public interfaces (functions, classes, schemas). Rename or removal is strictly prohibited.")
+        context.append("- STRUCTURAL INTEGRITY: Audit for unintended modifications to core logic, deterministic formulas, or data serialization schemas.")
+        context.append("- PARITY VERIFICATION: Ensure that data structures and calculated values maintain strict parity with the baseline version.")
+        context.append("- DEPENDENCY AUDIT: Identify and report any dropped imports, removed methods, or altered module relationships.")
 
         return "\n".join(context)
 
     def print_context(self, storage, config=None):
         """Render context.md as a styled rich Panel in the terminal."""
         if not storage.context_file.exists():
-            _console.print(
-                f"[{C_WARNING}][!][/{C_WARNING}] No context yet. Type "
-                f"[bold {C_PRIMARY}]report[/bold {C_PRIMARY}] first."
+            self.console.print(
+                f"[{C_WARNING}][!][/] No context yet. Type "
+                f"[bold {C_PRIMARY}]report[/] first."
             )
             return
 
@@ -214,19 +215,11 @@ class AuditSuggester:
 
         panel = Panel(
             text,
-            title=f"[bold {C_PRIMARY}] AGENT CONTEXT [/bold {C_PRIMARY}]",
-            subtitle=f"[{C_DIM}]copy and paste into your next prompt[/{C_DIM}]",
+            title=f"[bold {C_PRIMARY}] AGENT CONTEXT [/]",
+            subtitle=f"[{C_DIM}]copy and paste into your next prompt[/]",
             border_style=C_BORDER,
             box=box.ROUNDED,
             padding=(0, 1),
             expand=False,
         )
-        _console.print(panel)
-
-        # Raw copyable block — clean, no markdown symbols
-        clean = self._to_clean_text(raw)
-        _console.print()
-        _console.print(f"[{C_DIM}]  raw copy block  [/{C_DIM}]", justify="center")
-        _console.print(f"[{C_DIM}]" + "-" * 44 + f"[/{C_DIM}]")
-        _console.print(f"[{C_DIM}]{clean}[/{C_DIM}]")
-        _console.print(f"[{C_DIM}]" + "-" * 44 + f"[/{C_DIM}]")
+        self.console.print(panel)

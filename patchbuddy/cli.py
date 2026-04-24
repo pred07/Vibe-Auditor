@@ -6,6 +6,8 @@ from pathlib import Path
 from .storage import AuditStorage
 from .snapshot import AuditSnapshot
 from .differ import AuditDiffer
+from .watcher import start_watcher
+from .interactive import start_interactive
 
 console = Console()
 
@@ -113,23 +115,33 @@ def suggest(project):
 
 @main.command()
 @click.option('--project', default='.', help='Project root directory')
-def watch(project):
-    """Start the background watcher."""
-    try:
-        start_watcher(project)
-    except Exception as e:
-        console.print(f"[bold red]Error:[/bold red] {str(e)}")
-
-from .interactive import start_interactive
-
-@main.command()
-@click.option('--project', default='.', help='Project root directory')
 def start(project):
     """Start interactive mode (watcher + command line)."""
     try:
         start_interactive(project)
     except Exception as e:
-        console.print(f"[bold red]Error:[/bold red] {str(e)}")
+        from rich.markup import escape
+        console.print(f"[bold red]Error:[/bold red] {escape(str(e))}")
+
+@main.command()
+@click.option('--project', default='.', help='Project root directory')
+def zen(project):
+    """Start interactive mode in Zen Mode (dashboard only)."""
+    try:
+        start_interactive(project, zen_mode=True)
+    except Exception as e:
+        from rich.markup import escape
+        console.print(f"[bold red]Error:[/bold red] {escape(str(e))}")
+
+@main.command()
+@click.option('--project', default='.', help='Project root directory')
+def promptbuddy(project):
+    """Shortcut to generate audit context and instructions."""
+    try:
+        start_interactive(project, fix_command=True)
+    except Exception as e:
+        from rich.markup import escape
+        console.print(f"[bold red]Error:[/bold red] {escape(str(e))}")
 
 if __name__ == "__main__":
     main()
